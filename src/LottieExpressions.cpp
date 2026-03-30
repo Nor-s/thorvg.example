@@ -34,8 +34,12 @@ struct UserExample : tvgexam::Example
     std::vector<unique_ptr<tvg::Animation>> animations;
     uint32_t w, h;
     uint32_t size;
+    tvg::Canvas* _canvas = nullptr;
 
     int counter = 0;
+    bool loaded = false;
+    uint32_t toggleTime = 0;
+    int cycle = 0;
 
     void populate(const char* path) override
     {
@@ -65,8 +69,40 @@ struct UserExample : tvgexam::Example
         counter++;
     }
 
+    void loadAnimations()
+    {
+        counter = 0;
+        this->scandir(EXAMPLE_DIR"/lottie/expressions");
+
+        for (auto& animation : animations) {
+            _canvas->add(animation->picture());
+        }
+
+        loaded = true;
+        cout << "[Cycle " << cycle << "] Loaded " << animations.size() << " animations" << endl;
+    }
+
+    void unloadAnimations()
+    {
+        for (auto& animation : animations) {
+            _canvas->remove(animation->picture());
+        }
+        animations.clear();
+
+        loaded = false;
+        cout << "[Cycle " << cycle << "] Unloaded all animations" << endl;
+        cycle++;
+    }
+
     bool update(tvg::Canvas* canvas, uint32_t elapsed) override
     {
+        //toggle every 5 seconds
+        // if (elapsed - toggleTime >= 5000) {
+        //     toggleTime = elapsed;
+        //     if (loaded) unloadAnimations();
+        //     else loadAnimations();
+        // }
+
         for (auto& animation : animations) {
             auto progress = tvgexam::progress(elapsed, animation->duration());
             animation->frame(animation->totalFrame() * progress);
@@ -79,6 +115,8 @@ struct UserExample : tvgexam::Example
 
     bool content(tvg::Canvas* canvas, uint32_t w, uint32_t h) override
     {
+        _canvas = canvas;
+
         //The default font for fallback in case
         tvg::Text::load(EXAMPLE_DIR"/font/PublicSans-Regular.ttf");
 
@@ -93,12 +131,7 @@ struct UserExample : tvgexam::Example
         this->h = h;
         this->size = w / NUM_PER_ROW;
 
-        this->scandir(EXAMPLE_DIR"/lottie/expressions");
-
-        //Run animation loop
-        for (auto& animation : animations) {
-            canvas->add(animation->picture());
-        }
+        loadAnimations();
 
         return true;
     }

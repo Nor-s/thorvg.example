@@ -1,5 +1,4 @@
 cc = meson.get_compiler('cpp')
-thorvg_dep = dependency('thorvg-1', required: true)
 examples_dep = [thorvg_dep, dependency('sdl2', required: true)]
 compiler_flags = ['-DSDL_MAIN_HANDLED']
 
@@ -85,17 +84,13 @@ source_file = [
     'Viewport.cpp'
 ]
 
-thorvg_inc = include_directories(join_paths(thorvg_dep.get_variable(pkgconfig: 'includedir'), 'thorvg-1'))
+thorvg_inc = thorvg_proj.get_variable('thorvg_inc')
+thorvg_lottie_inc = include_directories(join_paths('..', 'subprojects', 'thorvg', 'src', 'loaders', 'lottie'))
+thorvg_capi_inc = include_directories(join_paths('..', 'subprojects', 'thorvg', 'src', 'bindings', 'capi'))
+extra_inc = [thorvg_inc, thorvg_lottie_inc, thorvg_capi_inc]
 
 # Lottie Examples
-lottie_example = '''
-    #include <thorvg_lottie.h>
-    int main(int argc, char **argv) {
-        return tvg::LottieAnimation::gen() ? 0 : 1;
-    }
-'''
-
-if cc.links(lottie_example, dependencies : thorvg_dep, include_directories : thorvg_inc)
+if fs.is_file(join_paths(meson.current_source_dir(), '..', 'subprojects', 'thorvg', 'src', 'loaders', 'lottie', 'thorvg_lottie.h'))
     source_file += [
         'Lottie.cpp',
         'LottieExpressions.cpp',
@@ -110,7 +105,7 @@ else
 endif
 
 # CAPI Examples
-if cc.has_function('tvg_shape_new', prefix: '#include <thorvg_capi.h>', include_directories: thorvg_inc, dependencies: thorvg_dep)
+if fs.is_file(join_paths(meson.current_source_dir(), '..', 'subprojects', 'thorvg', 'src', 'bindings', 'capi', 'thorvg_capi.h'))
     source_file += ['Capi.cpp']
     message('ThorVG CAPI found. Enabled Capi examples.')
 else
@@ -120,6 +115,7 @@ endif
 foreach current_file : source_file
     name = current_file.split('.')[0]
     executable(name, current_file,
+        include_directories: extra_inc,
         dependencies: examples_dep,
         cpp_args : compiler_flags)
 endforeach

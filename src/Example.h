@@ -27,7 +27,7 @@
 #include <iostream>
 #include <cstring>
 #include <chrono>
-#include <thorvg-1/thorvg.h>
+#include <thorvg.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
 #ifdef _WIN32
