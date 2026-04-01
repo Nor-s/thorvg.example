@@ -1,0 +1,11 @@
+option('threads',
+  type: 'boolean',
+  value: true,
+  description: 'Enable the multi-threading task scheduler in thorvg')
+
+# Option for selecting thorvg subproject
+option('thorvg_subproject',
+  type: 'combo',
+  choices: ['thorvg', 'thorvg-main', 'thorvg-main-feature', 'thorvg-feature-remove'],
+  value: 'thorvg',
+  description: 'Select thorvg subproject (thorvg, thorvg-main, thorvg-main-feature, thorvg-feature-remove)')
