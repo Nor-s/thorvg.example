@@ -22,119 +22,124 @@
 
 #include "Example.h"
 
-/************************************************************************/
-/* ThorVG Drawing Contents                                              */
-/************************************************************************/
+ /************************************************************************/
+ /* ThorVG Drawing Contents                                              */
+ /************************************************************************/
 
 #define NUM_PER_ROW 6
 #define NUM_PER_COL 6
 
 struct UserExample : tvgexam::Example
 {
-    std::vector<unique_ptr<tvg::Animation>> animations;
-    uint32_t w, h;
-    uint32_t size;
-    tvg::Canvas* _canvas = nullptr;
+	std::vector<unique_ptr<tvg::Animation>> animations;
+	uint32_t w, h;
+	uint32_t size;
+	tvg::Canvas* _canvas = nullptr;
 
-    int counter = 0;
-    bool loaded = false;
-    uint32_t toggleTime = 0;
-    int cycle = 0;
+	int counter = 0;
+	bool loaded = false;
+	uint32_t toggleTime = 0;
+	int cycle = 0;
 
-    void populate(const char* path) override
-    {
-        if (counter >= NUM_PER_ROW * NUM_PER_COL) return;
+	void populate(const char* path) override
+	{
+		if (counter >= NUM_PER_ROW * NUM_PER_COL) return;
 
-        //ignore if not lottie.
-        const char *ext = path + strlen(path) - 4;
-        if (strcmp(ext, "json") && strcmp(ext, "lot")) return;
+		//ignore if not lottie.
+		const char* ext = path + strlen(path) - 4;
+		if (strcmp(ext, "json") && strcmp(ext, "lot")) return;
 
-        //Animation Controller
-        auto animation = tvg::Animation::gen();
-        auto picture = animation->picture();
-        picture->origin(0.5f, 0.5f);
+		//Animation Controller
+		auto animation = tvg::Animation::gen();
+		auto picture = animation->picture();
+		picture->origin(0.5f, 0.5f);
 
-        if (!tvgexam::verify(picture->load(path))) return;
+		if (!tvgexam::verify(picture->load(path))) return;
 
-        //image scaling preserving its aspect ratio
-        float w, h;
-        picture->size(&w, &h);
-        picture->scale((w > h) ? size / w : size / h);
-        picture->translate((counter % NUM_PER_ROW) * size + size / 2, (counter / NUM_PER_ROW) * (this->h / NUM_PER_COL) + size / 2);
+		//image scaling preserving its aspect ratio
+		float w, h;
+		picture->size(&w, &h);
+		picture->scale((w > h) ? size / w : size / h);
+		picture->translate((counter % NUM_PER_ROW) * size + size / 2, (counter / NUM_PER_ROW) * (this->h / NUM_PER_COL) + size / 2);
 
-        animations.push_back(unique_ptr<tvg::Animation>(animation));
+		animations.push_back(unique_ptr<tvg::Animation>(animation));
 
-        cout << "Lottie: " << path << endl;
+		cout << "Lottie: " << path << endl;
 
-        counter++;
-    }
+		counter++;
+	}
 
-    void loadAnimations()
-    {
-        counter = 0;
-        this->scandir(EXAMPLE_DIR"/lottie/expressions");
+	void loadAnimations()
+	{
+		counter = 0;
+		this->scandir(EXAMPLE_DIR"/lottie/expressions");
 
-        for (auto& animation : animations) {
-            _canvas->add(animation->picture());
-        }
+		for (auto& animation : animations) {
+			_canvas->add(animation->picture());
+		}
 
-        loaded = true;
-        cout << "[Cycle " << cycle << "] Loaded " << animations.size() << " animations" << endl;
-    }
+		loaded = true;
+		cout << "[Cycle " << cycle << "] Loaded " << animations.size() << " animations" << endl;
+	}
 
-    void unloadAnimations()
-    {
-        for (auto& animation : animations) {
-            _canvas->remove(animation->picture());
-        }
-        animations.clear();
+	void unloadAnimations()
+	{
+		for (auto& animation : animations) {
+			_canvas->remove(animation->picture());
+		}
+		animations.clear();
 
-        loaded = false;
-        cout << "[Cycle " << cycle << "] Unloaded all animations" << endl;
-        cycle++;
-    }
+		loaded = false;
+		cout << "[Cycle " << cycle << "] Unloaded all animations" << endl;
+		cycle++;
+	}
 
-    bool update(tvg::Canvas* canvas, uint32_t elapsed) override
-    {
-        //toggle every 5 seconds
-        // if (elapsed - toggleTime >= 5000) {
-        //     toggleTime = elapsed;
-        //     if (loaded) unloadAnimations();
-        //     else loadAnimations();
-        // }
+	bool update(tvg::Canvas* canvas, uint32_t elapsed) override
+	{
+		//toggle every 5 seconds
+		// if (elapsed - toggleTime >= 5000) {
+		//     toggleTime = elapsed;
+		//     if (loaded) unloadAnimations();
+		//     else loadAnimations();
+		// }
 
-        for (auto& animation : animations) {
-            auto progress = tvgexam::progress(elapsed, animation->duration());
-            animation->frame(animation->totalFrame() * progress);
-        }
+		for (auto& animation : animations) {
+			auto progress = tvgexam::progress(elapsed, animation->duration());
+			animation->frame(animation->totalFrame() * progress);
+		}
+		////toggle every 5 seconds
+		//if (elapsed - toggleTime >= 1000) {
+		//	toggleTime = elapsed;
+		//	if (loaded) unloadAnimations();
+		//	else loadAnimations();
+		//}
+		canvas->update();
 
-        canvas->update();
+		return true;
+	}
 
-        return true;
-    }
+	bool content(tvg::Canvas* canvas, uint32_t w, uint32_t h) override
+	{
+		_canvas = canvas;
 
-    bool content(tvg::Canvas* canvas, uint32_t w, uint32_t h) override
-    {
-        _canvas = canvas;
+		//The default font for fallback in case
+		tvg::Text::load(EXAMPLE_DIR"/font/PublicSans-Regular.ttf");
 
-        //The default font for fallback in case
-        tvg::Text::load(EXAMPLE_DIR"/font/PublicSans-Regular.ttf");
+		//Background
+		auto shape = tvg::Shape::gen();
+		shape->appendRect(0, 0, w, h);
+		shape->fill(75, 75, 75);
 
-        //Background
-        auto shape = tvg::Shape::gen();
-        shape->appendRect(0, 0, w, h);
-        shape->fill(75, 75, 75);
+		canvas->add(shape);
 
-        canvas->add(shape);
+		this->w = w;
+		this->h = h;
+		this->size = w / NUM_PER_ROW;
 
-        this->w = w;
-        this->h = h;
-        this->size = w / NUM_PER_ROW;
+		loadAnimations();
 
-        loadAnimations();
-
-        return true;
-    }
+		return true;
+	}
 };
 
 
@@ -142,7 +147,11 @@ struct UserExample : tvgexam::Example
 /* Entry Point                                                          */
 /************************************************************************/
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
-    return tvgexam::main(new UserExample, argc, argv, false, 1024, 1024, 0, true);
+	int threadcnt = 0;
+	if (argc > 2) {
+		threadcnt = atoi(argv[2]);
+	}
+	return tvgexam::main(new UserExample, argc, argv, false, 1024, 1024, threadcnt, true);
 }
