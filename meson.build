@@ -1,7 +1,7 @@
 project('thorvg.example',
   'cpp',
   version: '1.0',
-  default_options: ['buildtype=release', 'cpp_std=c++14', 'optimization=s',  'b_sanitize=none', 'default_library=static'],
+  default_options: ['buildtype=debugoptimized', 'cpp_std=c++14', 'optimization=3',  'b_sanitize=none', 'default_library=static'],
   license : 'MIT')
 
 
@@ -17,8 +17,8 @@ threads_opt = get_option('threads')
 thorvg_subproject = get_option('thorvg_subproject')
 
 thorvg_proj = subproject(thorvg_subproject, default_options: [
-  'buildtype=release',
-  'optimization=s',
+  'buildtype=' + get_option('buildtype'),
+  'optimization=' + get_option('optimization'),
   'engines=sw,gl',
   'loaders=all',
   'savers=all',
