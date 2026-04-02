@@ -48,7 +48,11 @@ if defined THORVG_MSYS2_ROOT (
 
 set "BASH_EXE=%MSYS2_ROOT%\usr\bin\bash.exe"
 set "UCRT64_BIN=%MSYS2_ROOT%\ucrt64\bin"
-set "BUILD_DIR=builddir_%THORVG_SUBPROJECT%_%THREADS%"
+if defined THORVG_BUILD_DIR (
+    set "BUILD_DIR=%THORVG_BUILD_DIR%"
+) else (
+    set "BUILD_DIR=build_msys2_ucrt64_%THORVG_SUBPROJECT%_%THREADS%"
+)
 set "MESON_OPTIONS=-Dthorvg_subproject=%THORVG_SUBPROJECT% -Dthreads=%THREADS%"
 set "MSYS2_INSTALLER_URL=https://github.com/msys2/msys2-installer/releases/download/nightly-x86_64/msys2-base-x86_64-latest.sfx.exe"
 set "MSYS2_PACKAGES=base-devel mingw-w64-ucrt-x86_64-binutils mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-meson mingw-w64-ucrt-x86_64-ninja mingw-w64-ucrt-x86_64-pkgconf mingw-w64-ucrt-x86_64-vulkan-loader mingw-w64-ucrt-x86_64-libpng mingw-w64-ucrt-x86_64-libjpeg-turbo mingw-w64-ucrt-x86_64-libwebp mingw-w64-ucrt-x86_64-freetype"

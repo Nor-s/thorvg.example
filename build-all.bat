@@ -4,7 +4,7 @@ setlocal EnableExtensions
 set "SCRIPT_DIR=%~dp0"
 set "BUILD_SCRIPT=%SCRIPT_DIR%build-msys2-ucrt64.bat"
 
-set "SUBPROJECTS=thorvg thorvg-main thorvg-main-feature thorvg-feature-remove"
+set "SUBPROJECTS=thorvg thorvg-main"
 set "THREADS_OPTIONS=true false"
 
 echo [thorvg] Starting parallel builds for all combinations...
